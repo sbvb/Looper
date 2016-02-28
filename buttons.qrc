@@ -1,0 +1,11 @@
+<RCC>
+    <qresource prefix="/">
+        <file>Resources/PauseNormalRed.png</file>
+        <file>Resources/RecordNormal.png</file>
+        <file>Resources/Stop1DisabledRed.png</file>
+        <file>Resources/MicIconSimple.png</file>
+        <file>Resources/RecordPressed.png</file>
+        <file>Resources/MicrophoneDisabled.png</file>
+        <file>Resources/MicrophoneNormal.png</file>
+    </qresource>
+</RCC>
