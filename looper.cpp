@@ -7,37 +7,6 @@
 
 using namespace std;
 
-#define SAMPLE_RATE  (44100)
-#define FRAMES_PER_BUFFER (512)
-#define MAX_NUM_SECONDS (30)
-#define NUM_CHANNELS    (2)
-#define DITHER_FLAG     (0)
-#define WRITE_TO_FILE   (0)
-#define SYNCH_TIME 5500
-
-/* Select sample format. */
-#if 1
-#define PA_SAMPLE_TYPE  paFloat32
-typedef float SAMPLE;
-#define SAMPLE_SILENCE  (0.0f)
-#define PRINTF_S_FORMAT "%.8f"
-#elif 1
-#define PA_SAMPLE_TYPE  paInt16
-typedef short SAMPLE;
-#define SAMPLE_SILENCE  (0)
-#define PRINTF_S_FORMAT "%d"
-#elif 0
-#define PA_SAMPLE_TYPE  paInt8
-typedef char SAMPLE;
-#define SAMPLE_SILENCE  (0)
-#define PRINTF_S_FORMAT "%d"
-#else
-#define PA_SAMPLE_TYPE  paUInt8
-typedef unsigned char SAMPLE;
-#define SAMPLE_SILENCE  (128)
-#define PRINTF_S_FORMAT "%d"
-#endif
-
 int globalFrameIndex = 0; //Global variable: tracks the first recording's current frame
 int globalTrack0Length = 0; //Global variable: looks for how much the first recording will last
 
@@ -313,9 +282,12 @@ void Looper::stopPlayback()
     /* Function that stop the program and close all streams */
 
     for(int j=0;j<totalTracks;j++) {
+        for(int k=0;k<numSamples;k++)
+            data[j].recordedSamples[k] = 0;
         err = Pa_CloseStream(stream[j]);
         if( err != paNoError ) error(err);
     }
+    totalTracks = 0;
 }
 
 
@@ -345,7 +317,7 @@ PaError Looper::error(PaError err)
     return err;
 }
 
-void Looper::on_recordButton_released()
+void Looper::on_recordButton_clicked()
 {
     /* Qt Button configuration using aleready defined functions */
 
@@ -407,7 +379,3 @@ void Looper::on_textEdit_destroyed()
 
 }
 
-void Looper::on_recordButton_clicked()
-{
-
-}

@@ -6,10 +6,11 @@
 
 #define SAMPLE_RATE  (44100)
 #define FRAMES_PER_BUFFER (512)
-#define NUM_SECONDS     (10)
+#define MAX_NUM_SECONDS (30)
 #define NUM_CHANNELS    (2)
 #define DITHER_FLAG     (0)
 #define WRITE_TO_FILE   (0)
+#define SYNCH_TIME 5500
 
 /* Select sample format. */
 #if 1
@@ -92,8 +93,6 @@ public:
 
 
 private slots:
-    void on_recordButton_released();
-
     void on_pauseButton_clicked();
 
     void on_stopButton_clicked();
