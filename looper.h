@@ -2,6 +2,7 @@
 #define LOOPER_H
 
 #include <QMainWindow>
+#include <QMessageBox>
 #include "portaudio.h"
 
 #define SAMPLE_RATE  (44100)
@@ -95,8 +96,6 @@ private slots:
     void on_pauseButton_clicked();
 
     void on_stopButton_clicked();
-
-    void on_textEdit_destroyed();
 
     void on_recordButton_clicked();
 

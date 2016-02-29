@@ -139,7 +139,8 @@ static int playCallback( const void *inputBuffer, void *outputBuffer,
     }
 
     if (data->trackNumber != 0){ //Will not enter this loop if we're working with the first track.
-        while ((calculateSynchTime(data->startingFrame, SYNCH_TIME) >= (globalFrameIndex)) && (data->frameIndex == 0)){ //Waits until the main track reaches the synch point for this track.
+        int synchedTime = calculateSynchTime(data->startingFrame, SYNCH_TIME);
+        while ((synchedTime >= (globalFrameIndex)) && (data->frameIndex == 0)){ //Waits until the main track reaches the synch point for this track.
             continue;
         }
     }
@@ -179,7 +180,6 @@ static int playCallback( const void *inputBuffer, void *outputBuffer,
 
 Looper::Looper(QWidget *parent) : QMainWindow(parent),ui(new Ui::Looper)
 {
-
     ui->setupUi(this);
     err = Pa_Initialize();
     totalTracks = 0;
@@ -191,8 +191,9 @@ Looper::Looper(QWidget *parent) : QMainWindow(parent),ui(new Ui::Looper)
 
     inputParameters.device = Pa_GetDefaultInputDevice(); // default input device
     if (inputParameters.device == paNoDevice) {
-        fprintf(stderr,"Error: No default input device.\n");
-        error(err);
+        QMessageBox mbox;
+        mbox.setText("Error: No default input device.\n");
+        mbox.exec();
     }
     inputParameters.channelCount = 2;                    // stereo input
     inputParameters.sampleFormat = PA_SAMPLE_TYPE;
@@ -201,8 +202,9 @@ Looper::Looper(QWidget *parent) : QMainWindow(parent),ui(new Ui::Looper)
 
     outputParameters.device = Pa_GetDefaultOutputDevice(); // default output device
     if (outputParameters.device == paNoDevice) {
-        fprintf(stderr,"Error: No default output device.\n");
-        error(err);
+        QMessageBox mbox;
+        mbox.setText("Error: No default input device.\n");
+        mbox.exec();
     }
     outputParameters.channelCount = 2;                     // stereo output
     outputParameters.sampleFormat =  PA_SAMPLE_TYPE;
@@ -315,14 +317,9 @@ void Looper::stopPlayback()
     for(int j=0;j<totalTracks;j++) {
         err = Pa_CloseStream(stream[j]);
         if( err != paNoError ) error(err);
+        if( data[j].recordedSamples ) delete data[j].recordedSamples; //Deleting all track samples to prevent memory leak
     }
-
     totalTracks = 0;
-
-    QString TracksText = QString::number(totalTracks);
-    ui->textEdit_2->setText("     "+TracksText);
-    ui->pauseButton->setEnabled(false);
-    ui->stopButton->setEnabled(false);
 }
 
 
@@ -341,12 +338,10 @@ PaError Looper::error(PaError err)
     /* Function to handle errors. It will appear throughout the code */
 
     Pa_Terminate();
-    if( err != paNoError )
-    {
-        fprintf( stderr, "An error occured while using the portaudio stream\n" );
-        fprintf( stderr, "Error number: %d\n", err );
-        fprintf( stderr, "Error message: %s\n", Pa_GetErrorText( err ) );
-        err = 1;          /* Always return 0 or 1, but no other return codes. */
+    if( err != paNoError ) {
+        QMessageBox mbox;
+        mbox.setText("An unknown error occurred while using the portaudio stream!\n Definitely not our fault!\n");
+        mbox.exec();
     }
     this->~Looper();
     return err;
@@ -365,14 +360,17 @@ void Looper::on_recordButton_clicked()
         ui->recordButton->setText("Stop Recording");
         ui->pauseButton->setDisabled(true);
         ui->stopButton->setDisabled(true);
-
     }
     else {
         stopRecording(totalTracks);
         startPlayback(totalTracks);
         recording = false;
         ui->textEdit->setText("PLAYING BACK");
-    ui->MicLabel->setPixmap(QPixmap(":/Resources/MicrophoneDisabled.png"));
+        if(totalTracks >= 3) {
+            ui->textEdit->setText("PLAYING BACK\n*Max number of tracks reached!");
+            ui->recordButton->setDisabled(true);
+        }
+        ui->MicLabel->setPixmap(QPixmap(":/Resources/MicrophoneDisabled.png"));
         ui->recordButton->setIcon(QIcon(":/Resources/RecordNormal.png"));
         ui->recordButton->setText("Record");
         ui->pauseButton->setEnabled(true);
@@ -391,26 +389,28 @@ void Looper::on_pauseButton_clicked()
         pausePlayback();
         paused = true;
         ui->textEdit->setText("PAUSED");
-        ui->recordButton->setDisabled(true);
+        ui->recordButton->setEnabled(false);
     }
     else {
         resumePlayback();
         paused = false;
         ui->textEdit->setText("PLAYING BACK");
         ui->recordButton->setEnabled(true);
+        if(totalTracks>=4) ui->recordButton->setEnabled(false);
     }
 }
 
 void Looper::on_stopButton_clicked()
 {
     /* Qt Button configuration using aleready defined functions */
-
     stopPlayback();
     ui->textEdit->setText("STOPPED");
+    QString TracksText = QString::number(totalTracks);
+    ui->textEdit_2->setText("     "+TracksText);
+    ui->pauseButton->setEnabled(false);
+    ui->stopButton->setEnabled(false);
+    ui->recordButton->setEnabled(true);
 }
 
-void Looper::on_textEdit_destroyed()
-{
 
-}
 
