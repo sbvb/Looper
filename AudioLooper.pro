@@ -30,3 +30,10 @@ RESOURCES += \
 
 
 
+
+unix:!macx: LIBS += -L$$PWD/libsndfile/ -lsndfile
+
+INCLUDEPATH += $$PWD/libsndfile
+DEPENDPATH += $$PWD/libsndfile
+
+unix:!macx: PRE_TARGETDEPS += $$PWD/libsndfile/libsndfile.a

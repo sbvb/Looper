@@ -7,5 +7,6 @@
         <file>Resources/RecordPressed.png</file>
         <file>Resources/MicrophoneDisabled.png</file>
         <file>Resources/MicrophoneNormal.png</file>
+        <file>Resources/save.png</file>
     </qresource>
 </RCC>

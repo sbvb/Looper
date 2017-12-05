@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <iostream>
 #include "portaudio.h"
+#include "sndfile.h"
 
 using namespace std;
 
@@ -196,7 +197,7 @@ Looper::Looper(QWidget *parent) : QMainWindow(parent),ui(new Ui::Looper)
         mbox.exec();
     }
     inputParameters.channelCount = 2;                    // stereo input
-    inputParameters.sampleFormat = PA_SAMPLE_TYPE;
+    inputParameters.sampleFormat = paFloat32;
     inputParameters.suggestedLatency = Pa_GetDeviceInfo( inputParameters.device )->defaultLowInputLatency;
     inputParameters.hostApiSpecificStreamInfo = NULL;
 
@@ -207,7 +208,7 @@ Looper::Looper(QWidget *parent) : QMainWindow(parent),ui(new Ui::Looper)
         mbox.exec();
     }
     outputParameters.channelCount = 2;                     // stereo output
-    outputParameters.sampleFormat =  PA_SAMPLE_TYPE;
+    outputParameters.sampleFormat = paFloat32;
     outputParameters.suggestedLatency = Pa_GetDeviceInfo( outputParameters.device )->defaultLowOutputLatency;
     outputParameters.hostApiSpecificStreamInfo = NULL;
 
@@ -322,6 +323,20 @@ void Looper::stopPlayback()
     totalTracks = 0;
 }
 
+void Looper::savePlayback()
+{
+    SF_INFO ndsInfo;
+    ndsInfo.frames = FRAMES_PER_BUFFER;
+    ndsInfo.samplerate = SAMPLE_RATE;
+    ndsInfo.channels = NUM_CHANNELS;
+    ndsInfo.format = SF_FORMAT_WAV;
+    SNDFILE* myFile = sf_open("/home/cadu/Looper/loop.wav", SFM_WRITE, &ndsInfo);
+
+    sf_count_t numCount = sf_write_raw(myFile, (void*) data[0].recordedSamples, (data[0].finalFrame)*64);
+
+    cout << numCount << endl;
+}
+
 
 Looper::~Looper()
 {
@@ -412,5 +427,11 @@ void Looper::on_stopButton_clicked()
     ui->recordButton->setEnabled(true);
 }
 
+void Looper::on_saveButton_clicked()
+{
+    /* Qt Button configuration using aleready defined functions */
+    savePlayback();
+    ui->textEdit->setText("Playback saved to loop.wav");
+}
 
 

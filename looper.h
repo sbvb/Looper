@@ -85,6 +85,7 @@ public:
     void pausePlayback();
     void resumePlayback();
     void stopPlayback();
+    void savePlayback();
     void getDeviceInfo();
     static void PrintSupportedStandardSampleRates();
 
@@ -98,6 +99,8 @@ private slots:
     void on_stopButton_clicked();
 
     void on_recordButton_clicked();
+
+    void on_saveButton_clicked();
 
 private:
     Ui::Looper *ui;
